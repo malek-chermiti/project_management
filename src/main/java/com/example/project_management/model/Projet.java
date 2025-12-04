@@ -75,6 +75,10 @@ public class Projet {
         return chat;
     }
     
+    public List<User> getMembres() {
+        return membres;
+    }
+    
     // Setters (pas de setter pour id et dateCreation)
     public void setNom(String nom) {
         this.nom = nom;
@@ -94,6 +98,10 @@ public class Projet {
     
     public void setChat(Chat chat) {
         this.chat = chat;
+    }
+    
+    public void setMembres(List<User> membres) {
+        this.membres = membres;
     }
     
   

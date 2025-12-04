@@ -1,7 +1,7 @@
 package com.example.project_management.model;
 
 import jakarta.persistence.*;
-import java.util.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "messages")
@@ -12,7 +12,7 @@ public class Message {
     private Long id;
 
     private String contenu;
-    private Date dateEnvoi = null;
+    private LocalDateTime dateEnvoi = null;
 
     // --- Relations ---
     @ManyToOne
@@ -44,11 +44,11 @@ public class Message {
         this.contenu = contenu;
     }
 
-    public Date getDateEnvoi() {
+    public LocalDateTime getDateEnvoi() {
         return dateEnvoi;
     }
 
-    public void setDateEnvoi(Date dateEnvoi) {
+    public void setDateEnvoi(LocalDateTime dateEnvoi) {
         this.dateEnvoi = dateEnvoi;
     }
 
@@ -71,7 +71,7 @@ public class Message {
     @PrePersist
     protected void onCreate() {
         if (this.dateEnvoi == null) {
-            this.dateEnvoi = new Date();
+            this.dateEnvoi = LocalDateTime.now();
         }
     }
 }
