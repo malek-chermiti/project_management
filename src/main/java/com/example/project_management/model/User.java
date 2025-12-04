@@ -12,6 +12,15 @@ public class User {
     private Long id;
 
     private String nom;
+    private String prenom;
+
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -47,8 +56,9 @@ public class User {
     // --- Constructors ---
     public User() {}
 
-    public User(String nom, String email, String motDePasse) {
+    public User(String nom,String prenom ,String email, String motDePasse) {
         this.nom = nom;
+        this.prenom = prenom;
         this.email = email;
         this.motDePasse = motDePasse;
     }
