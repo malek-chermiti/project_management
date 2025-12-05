@@ -17,11 +17,8 @@ public class UserService {
 
     public User createUser(User user) {
         String hashedPassword = encoder.encode(user.getMotDePasse());
-        
         user.setMotDePasse(hashedPassword);
-
-        userRepository.save(user);
-        return user;
+        return userRepository.save(user);
     }
 
     public User authenticate(String email, String motDePasse) {
@@ -30,31 +27,27 @@ public class UserService {
         return encoder.matches(motDePasse, user.getMotDePasse()) ? user : null;
     }
 
-    public void forgotPassword(String email) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    // SRP: UserService manages user lifecycle and profile operations
+    public User getById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
-    public Projet creerProjet(Long userId, String nom, String description) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public User updateProfile(Long userId, String nom, String prenom, String email) {
+        User user = getById(userId);
+        if (nom != null) user.setNom(nom);
+        if (prenom != null) user.setPrenom(prenom);
+        if (email != null) user.setEmail(email);
+        return userRepository.save(user);
     }
 
-    public void rejoindreProjet(Long userId, Long projetId) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = getById(userId);
+        if (!encoder.matches(oldPassword, user.getMotDePasse())) {
+            throw new SecurityException("Invalid current password");
+        }
+        user.setMotDePasse(encoder.encode(newPassword));
+        userRepository.save(user);
     }
-
-    public Projet accederProjet(Long userId, Long projetId) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    public Task gererTache(Long userId, Task task) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    public void changerEtatTache(Long userId, Long taskId, String etat) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    public Message envoyerMessage(Long userId, Long chatId, String contenu) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
+    
 }
