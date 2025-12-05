@@ -33,6 +33,14 @@ public class User {
     @OneToMany(mappedBy = "createur")
     private List<Projet> projetsCrees = new ArrayList<>();
 
+    public List<Projet> getProjetsCrees() {
+        return projetsCrees;
+    }
+
+    public void setProjetsCrees(List<Projet> projetsCrees) {
+        this.projetsCrees = projetsCrees;
+    }
+
     // Projects where the user is a member (Many-to-Many via join table)
     @ManyToMany
     @JoinTable(
