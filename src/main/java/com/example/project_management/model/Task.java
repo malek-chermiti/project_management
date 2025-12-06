@@ -20,7 +20,7 @@ public class Task {
     private String description;
     
     @Column(nullable = false)
-    private String etat;
+    private String etat = "todo";//Todo, en progres , en verification, terminee
     
     @Column(nullable = false)
     private LocalDateTime deadline;                         
@@ -50,11 +50,10 @@ public class Task {
     public Task() {
     }
     // Constructeur paramétré (sans dateCreation - générée automatiquement)
-    public Task(String titre, String description, String etat, LocalDateTime deadline, 
+    public Task(String titre, String description, LocalDateTime deadline, 
                 Long priorite, Projet projet, List<User> assignees, User auteur) {
         this.titre = titre;
         this.description = description;
-        this.etat = etat;
         this.deadline = deadline;
         this.priorite = priorite;
         this.projet = projet;

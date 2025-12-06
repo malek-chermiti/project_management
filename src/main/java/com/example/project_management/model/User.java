@@ -61,6 +61,14 @@ public class User {
     @OneToMany(mappedBy = "auteur")
     private List<Message> messages = new ArrayList<>();
 
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
+
     // --- Constructors ---
     public User() {}
 
@@ -106,6 +114,22 @@ public class User {
 
     public void setProjets(List<Projet> projets) {
         this.projets = projets;
+    }
+
+    public List<Task> getTasksAssignees() {
+        return tasksAssignees;
+    }
+
+    public void setTasksAssignees(List<Task> tasksAssignees) {
+        this.tasksAssignees = tasksAssignees;
+    }
+
+    public List<Task> getTasksCreees() {
+        return tasksCreees;
+    }
+
+    public void setTasksCreees(List<Task> tasksCreees) {
+        this.tasksCreees = tasksCreees;
     }
 }
 

@@ -43,6 +43,9 @@ public class MessageService {
         Message message = new Message(contenu, actor, chat);
         Message saved = messageRepository.save(message);
         chat.getMessages().add(saved);
+        actor.getMessages().add(saved);
+        chatRepository.save(chat);
+        userRepository.save(actor);
         return saved;
     }
 }
