@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.project_management.repository.ProjetRepository;
 import com.example.project_management.repository.UserRepository;
+import com.example.project_management.repository.MessageRepository;
 import com.example.project_management.model.Projet;
 import com.example.project_management.model.User;
+import com.example.project_management.model.Task;
+import com.example.project_management.model.Message;
 
 @Service
 public class ProjetService {
@@ -13,11 +16,13 @@ public class ProjetService {
 	private final ProjetRepository projetRepository;
 	private final UserRepository userRepository;
 	private final ChatService chatService;
+	private final MessageRepository messageRepository;
 
-	public ProjetService(ProjetRepository projetRepository, UserRepository userRepository, ChatService chatService) {
+	public ProjetService(ProjetRepository projetRepository, UserRepository userRepository, ChatService chatService, MessageRepository messageRepository) {
 		this.projetRepository = projetRepository;
 		this.userRepository = userRepository;
 		this.chatService = chatService;
+		this.messageRepository = messageRepository;
 	}
 
 	public Projet getById(Long projetId) {
@@ -102,5 +107,17 @@ public class ProjetService {
 			throw new SecurityException("Access denied to this project");
 		}
 		return projet;
+	}
+
+	@Transactional(readOnly = true)
+	public java.util.List<User> listerMembres(Long projetId) {
+		Projet projet = getById(projetId);
+		return projet.getMembres();
+	}
+
+	@Transactional(readOnly = true)
+	public java.util.List<Task> listerTaches(Long projetId) {
+		Projet projet = getById(projetId);
+		return projet.getTaches();
 	}
 }

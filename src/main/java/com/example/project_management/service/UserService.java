@@ -2,6 +2,7 @@ package com.example.project_management.service;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.example.project_management.repository.UserRepository;
 import com.example.project_management.model.*;
 
@@ -48,6 +49,18 @@ public class UserService {
         }
         user.setMotDePasse(encoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<Projet> getMemberProjects(Long userId) {
+        User user = getById(userId);
+        return user.getProjets();
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<Projet> getCreatedProjects(Long userId) {
+        User user = getById(userId);
+        return user.getProjetsCrees();
     }
     
 }
