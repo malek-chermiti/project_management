@@ -24,35 +24,39 @@ public class ProjetService {
 	}
 
 	@Transactional
-	public Projet creerProjet(String email, String nom, String description) {
-		User createur = userRepository.findByEmail(email);
-        if (createur == null) {
-            throw new IllegalArgumentException("Creator user not found");
-        }
+	public Projet creerProjet(Long actorUserId, String nom, String description) {
+		User createur = userRepository.findById(actorUserId)
+				.orElseThrow(() -> new IllegalArgumentException("Creator user not found"));
 		Projet projet = new Projet(nom, description);
 		projet.setCreateur(createur);
         //add to creator's created projects
         createur.getProjetsCrees().add(projet);
 		Projet saved = projetRepository.save(projet);
 		userRepository.save(createur);
+		//todo create chat for project
 		return saved;
 	}
 
 	@Transactional
-	public void mettreAJourProjet(Long projetId, String nom, String description) {
+	public void mettreAJourProjet(Long projetId, Long actorUserId, String nom, String description) {
 		Projet projet = getById(projetId);
+		User actor = userRepository.findById(actorUserId)
+				.orElseThrow(() -> new IllegalArgumentException("Actor user not found"));
+
+		if (projet.getCreateur() == null || !projet.getCreateur().getId().equals(actor.getId())) {
+			throw new SecurityException("Only the project creator can update the project");
+		}
+
 		if (nom != null) projet.setNom(nom);
 		if (description != null) projet.setDescription(description);
 		projetRepository.save(projet);
 	}
 
 	@Transactional
-	public void ajouterMembre(Long projetId, String email) {
+	public void ajouterMembre(Long projetId, Long userId) {
 		Projet projet = getById(projetId);
-		User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new IllegalArgumentException("User not found");
-        }
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("User not found"));
 		if (!projet.getMembres().contains(user)) {
 			projet.getMembres().add(user);
 		}
