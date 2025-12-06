@@ -12,10 +12,12 @@ public class ProjetService {
 
 	private final ProjetRepository projetRepository;
 	private final UserRepository userRepository;
+	private final ChatService chatService;
 
-	public ProjetService(ProjetRepository projetRepository, UserRepository userRepository) {
+	public ProjetService(ProjetRepository projetRepository, UserRepository userRepository, ChatService chatService) {
 		this.projetRepository = projetRepository;
 		this.userRepository = userRepository;
+		this.chatService = chatService;
 	}
 
 	public Projet getById(Long projetId) {
@@ -33,7 +35,7 @@ public class ProjetService {
         createur.getProjetsCrees().add(projet);
 		Projet saved = projetRepository.save(projet);
 		userRepository.save(createur);
-		//todo create chat for project
+		chatService.createChatForProject(projet.getId());
 		return saved;
 	}
 
