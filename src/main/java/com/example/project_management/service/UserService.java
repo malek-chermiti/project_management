@@ -34,11 +34,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
-    public User updateProfile(Long userId, String nom, String prenom, String email) {
+    public User updateProfile(Long userId, String nom, String prenom) {
         User user = getById(userId);
         if (nom != null) user.setNom(nom);
         if (prenom != null) user.setPrenom(prenom);
-        if (email != null) user.setEmail(email);
+
         return userRepository.save(user);
     }
 
@@ -50,7 +50,7 @@ public class UserService {
         user.setMotDePasse(encoder.encode(newPassword));
         userRepository.save(user);
     }
-
+    // les projets joined
     @Transactional(readOnly = true)
     public java.util.List<Projet> getMemberProjects(Long userId) {
         User user = getById(userId);
