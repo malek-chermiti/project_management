@@ -1,9 +1,12 @@
+
+
 package com.example.project_management.controller;
 
+import com.example.project_management.dto.DTOLogin;
 import com.example.project_management.security.JwtUtil;
 import com.example.project_management.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,12 +19,22 @@ public class AuthController {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
     }
+    
     @PostMapping("/login")
-    public String login(@RequestBody Map<String, String> body) {
-        String email = body.getOrDefault("email", body.get("email"));
-        String password = body.get("mot_de_passe");
-        var user = userService.authenticate(email, password);
-        if (user == null) throw new RuntimeException("Invalid credentials");
-        return jwtUtil.generateToken(email);
+    public ResponseEntity<String> login(@RequestBody DTOLogin body) {
+        try {
+            String email = body.getEmail();
+            String password = body.getMot_de_passe();
+            
+            var user = userService.authenticate(email, password);
+            if (user == null) {
+                throw new SecurityException("Invalid email or password");
+            }
+            
+            String token = jwtUtil.generateToken(email);
+            return ResponseEntity.ok(token);
+        } catch (SecurityException e) {
+            throw e;
+        }
     }
 }
