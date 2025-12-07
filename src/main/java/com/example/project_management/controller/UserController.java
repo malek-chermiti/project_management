@@ -3,6 +3,7 @@ package com.example.project_management.controller;
 import com.example.project_management.model.User;
 import com.example.project_management.model.Projet;
 import com.example.project_management.dto.PasswordChangeDTO;
+import com.example.project_management.dto.ProfileUpdateDTO;
 import com.example.project_management.service.UserService;
 import com.example.project_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,10 @@ public class UserController {
     
     // POST - Sign in / Create user
     @PostMapping("/signin")
-    public ResponseEntity<User> signin(@RequestBody User user) {
+    public ResponseEntity<String> signin(@RequestBody User user) {
         try {
-            User createdUser = userService.createUser(user);
-            return ResponseEntity.ok(createdUser);
+            userService.createUser(user);
+            return ResponseEntity.ok("User created successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -73,18 +74,19 @@ public class UserController {
     
     // PATCH - Update profile (nom,prenom) of authenticated user
     @PatchMapping("/profile")
-    public ResponseEntity<User> updateProfile(
+    public ResponseEntity<ProfileUpdateDTO> updateProfile(
             Authentication authentication,
-            @RequestBody User updates) {
+            @RequestBody ProfileUpdateDTO updates) {
         User user = getCurrentUser(authentication);
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
         try {
-            User updated = userService.updateProfile(user.getId(), updates.getNom(),updates.getPrenom());
-            return ResponseEntity.ok(updated);
+            User updated = userService.updateProfile(user.getId(), updates.getNom(), updates.getPrenom());
+            ProfileUpdateDTO response = new ProfileUpdateDTO(updated.getNom(), updated.getPrenom());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build(); 
         }
     }
     
