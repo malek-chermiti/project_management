@@ -4,11 +4,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.project_management.repository.ProjetRepository;
 import com.example.project_management.repository.UserRepository;
-import com.example.project_management.repository.MessageRepository;
 import com.example.project_management.model.Projet;
 import com.example.project_management.model.User;
 import com.example.project_management.model.Task;
-import com.example.project_management.model.Message;
 
 @Service
 public class ProjetService {
@@ -16,13 +14,11 @@ public class ProjetService {
 	private final ProjetRepository projetRepository;
 	private final UserRepository userRepository;
 	private final ChatService chatService;
-	private final MessageRepository messageRepository;
 
-	public ProjetService(ProjetRepository projetRepository, UserRepository userRepository, ChatService chatService, MessageRepository messageRepository) {
+	public ProjetService(ProjetRepository projetRepository, UserRepository userRepository, ChatService chatService) {
 		this.projetRepository = projetRepository;
 		this.userRepository = userRepository;
 		this.chatService = chatService;
-		this.messageRepository = messageRepository;
 	}
 
 	public Projet getById(Long projetId) {
@@ -64,6 +60,12 @@ public class ProjetService {
 		Projet projet = getById(projetId);
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new IllegalArgumentException("User not found"));
+		
+		// Don't allow project owner to join
+		if (projet.getCreateur().getId().equals(user.getId())) {
+			throw new SecurityException("Project owner cannot join their own project");
+		}
+		
 		if (!projet.getMembres().contains(user)) {
 			projet.getMembres().add(user);
 		}
@@ -119,5 +121,17 @@ public class ProjetService {
 	public java.util.List<Task> listerTaches(Long projetId) {
 		Projet projet = getById(projetId);
 		return projet.getTaches();
+	}
+
+	@Transactional
+	public Projet updateProjet(Long projetId, String nom, String description) {
+		Projet projet = getById(projetId);
+		if (nom != null) {
+			projet.setNom(nom);
+		}
+		if (description != null) {
+			projet.setDescription(description);
+		}
+		return projetRepository.save(projet);
 	}
 }

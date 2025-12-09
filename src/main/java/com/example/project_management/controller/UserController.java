@@ -4,6 +4,7 @@ import com.example.project_management.model.User;
 import com.example.project_management.model.Projet;
 import com.example.project_management.dto.PasswordChangeDTO;
 import com.example.project_management.dto.ProfileUpdateDTO;
+import com.example.project_management.dto.ProjetResponseDTO;
 import com.example.project_management.service.UserService;
 import com.example.project_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -44,14 +46,18 @@ public class UserController {
     
     // GET - Projects joined by authenticated user
     @GetMapping("/projets-joined")
-    public ResponseEntity<List<Projet>> getProjectsJoined(Authentication authentication) {
+    public ResponseEntity<List<ProjetResponseDTO>> getProjectsJoined(Authentication authentication) {
         User user = getCurrentUser(authentication);
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
         try {
             List<Projet> projets = userService.getMemberProjects(user.getId());
-            return ResponseEntity.ok(projets);
+            List<ProjetResponseDTO> response = projets.stream()
+                .map(p -> new ProjetResponseDTO(p.getId(), p.getNom(), p.getDescription(), 
+                    p.getCreateur().getNom()+" "+p.getCreateur().getPrenom(), p.getDateCreation()))
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
@@ -59,14 +65,18 @@ public class UserController {
     
     // GET - Projects created by authenticated user
     @GetMapping("/projets-created")
-    public ResponseEntity<List<Projet>> getProjectsCreated(Authentication authentication) {
+    public ResponseEntity<List<ProjetResponseDTO>> getProjectsCreated(Authentication authentication) {
         User user = getCurrentUser(authentication);
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
         try {
             List<Projet> projets = userService.getCreatedProjects(user.getId());
-            return ResponseEntity.ok(projets);
+            List<ProjetResponseDTO> response = projets.stream()
+                .map(p -> new ProjetResponseDTO(p.getId(), p.getNom(), p.getDescription(), 
+                    p.getCreateur().getNom()+" "+p.getCreateur().getPrenom(), p.getDateCreation()))
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
@@ -111,14 +121,15 @@ public class UserController {
     
     // GET - Get authenticated user profile
     @GetMapping("/profile")
-    public ResponseEntity<User> getProfile(Authentication authentication) {
+    public ResponseEntity<ProfileUpdateDTO> getProfile(Authentication authentication) {
         User user = getCurrentUser(authentication);
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
         try {
             User profile = userService.getById(user.getId());
-            return ResponseEntity.ok(profile);
+            ProfileUpdateDTO response = new ProfileUpdateDTO(profile.getNom(), profile.getPrenom(), profile.getEmail());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
