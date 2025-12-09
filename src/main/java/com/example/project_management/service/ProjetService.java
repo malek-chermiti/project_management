@@ -7,6 +7,8 @@ import com.example.project_management.repository.UserRepository;
 import com.example.project_management.model.Projet;
 import com.example.project_management.model.User;
 import com.example.project_management.model.Task;
+import com.example.project_management.dto.MemberDTO;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjetService {
@@ -118,6 +120,14 @@ public class ProjetService {
 	}
 
 	@Transactional(readOnly = true)
+	public java.util.List<MemberDTO> getMembersDTO(Long projetId) {
+		Projet projet = getById(projetId);
+		return projet.getMembres().stream()
+				.map(user -> new MemberDTO(user.getId(), user.getNom(), user.getPrenom()))
+				.collect(Collectors.toList());
+	}
+
+	@Transactional(readOnly = true)
 	public java.util.List<Task> listerTaches(Long projetId) {
 		Projet projet = getById(projetId);
 		return projet.getTaches();
@@ -133,5 +143,51 @@ public class ProjetService {
 			projet.setDescription(description);
 		}
 		return projetRepository.save(projet);
+	}
+
+	@Transactional
+	public void leaveProjet(Long projetId, Long userId) {
+		Projet projet = getById(projetId);
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+		// Project owner cannot leave
+		if (projet.getCreateur().getId().equals(user.getId())) {
+			throw new SecurityException("Project owner cannot leave the project. Delete the project instead.");
+		}
+
+		// Only remove if the user is currently a member
+		boolean wasMember = projet.getMembres().remove(user);
+		if (wasMember) {
+			user.getProjets().remove(projet);
+			projetRepository.save(projet);
+			userRepository.save(user);
+		}
+	}
+
+	@Transactional
+	public void deleteProjet(Long projetId, Long actorUserId) {
+		Projet projet = getById(projetId);
+		User actor = userRepository.findById(actorUserId)
+				.orElseThrow(() -> new IllegalArgumentException("Actor user not found"));
+
+		// Only the creator can delete the project
+		if (projet.getCreateur() == null || !projet.getCreateur().getId().equals(actor.getId())) {
+			throw new SecurityException("Only the project creator can delete the project");
+		}
+
+		// Remove all members from project
+		for (User member : new java.util.ArrayList<>(projet.getMembres())) {
+			member.getProjets().remove(projet);
+			userRepository.save(member);
+		}
+		projet.getMembres().clear();
+
+		// Remove project from creator
+		actor.getProjetsCrees().remove(projet);
+		userRepository.save(actor);
+
+		// Delete the project
+		projetRepository.deleteById(projetId);
 	}
 }

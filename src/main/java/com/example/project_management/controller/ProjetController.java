@@ -4,12 +4,14 @@ import com.example.project_management.model.Projet;
 import com.example.project_management.model.User;
 import com.example.project_management.dto.ProjetUpdateDTO;
 import com.example.project_management.dto.ProjetResponseDTO;
+import com.example.project_management.dto.MemberDTO;
 import com.example.project_management.service.ProjetService;
 import com.example.project_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/projets")
@@ -77,6 +79,18 @@ public class ProjetController {
         }
     }
     
+    // GET - Get all members of a project
+    @GetMapping("/{id}/membres")
+    public ResponseEntity<List<MemberDTO>> getMembers(@PathVariable Long id) {
+        try {
+            List<MemberDTO> members = projetService.getMembersDTO(id);
+            return ResponseEntity.ok(members);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
     
     // DELETE - Remove a member from project
     @DeleteMapping("/{id}/membres/{userId}")
@@ -134,6 +148,50 @@ public class ProjetController {
         try {
             projetService.ajouterMembre(id, user.getId());
             return ResponseEntity.ok("Successfully joined project");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // POST - Leave a project (ordinary member)
+    @PostMapping("/{id}/leave")
+    public ResponseEntity<String> leaveProjet(
+            Authentication authentication,
+            @PathVariable Long id) {
+        User user = getCurrentUser(authentication);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        try {
+            projetService.leaveProjet(id, user.getId());
+            return ResponseEntity.ok("Successfully left project");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // DELETE - Delete project (owner only)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProjet(
+            Authentication authentication,
+            @PathVariable Long id) {
+        User user = getCurrentUser(authentication);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        try {
+            projetService.deleteProjet(id, user.getId());
+            return ResponseEntity.ok("Project deleted successfully");
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(e.getMessage());
         } catch (IllegalArgumentException e) {
