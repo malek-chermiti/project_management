@@ -62,5 +62,11 @@ public class UserService {
         User user = getById(userId);
         return user.getProjetsCrees();
     }
+
+    @Transactional(readOnly = true)
+    public java.util.List<Task> getAssignedTasks(Long userId) {
+        User user = getById(userId);
+        return user.getTasksAssignees();
+    }
     
 }

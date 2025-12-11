@@ -20,7 +20,7 @@ public class Task {
     private String description;
     
     @Column(nullable = false)
-    private String etat = "todo";//Todo, en progres , en verification, terminee
+    private String etat;//Todo, en progres , en verification, terminee
     
     @Column(nullable = false)
     private LocalDateTime deadline;                         
@@ -59,6 +59,7 @@ public class Task {
         this.projet = projet;
         this.assignees = assignees;
         this.auteur = auteur;
+        this.etat = "Todo"; // Etat initial par défaut
     }
     
     // Getters

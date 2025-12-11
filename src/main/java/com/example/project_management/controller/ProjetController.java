@@ -2,16 +2,20 @@ package com.example.project_management.controller;
 
 import com.example.project_management.model.Projet;
 import com.example.project_management.model.User;
+import com.example.project_management.model.Task;
 import com.example.project_management.dto.ProjetUpdateDTO;
 import com.example.project_management.dto.ProjetResponseDTO;
 import com.example.project_management.dto.MemberDTO;
+import com.example.project_management.dto.TaskResponseDTO;
 import com.example.project_management.service.ProjetService;
+import com.example.project_management.service.TaskService;
 import com.example.project_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/projets")
@@ -19,6 +23,9 @@ public class ProjetController {
     
     @Autowired
     private ProjetService projetService;
+    
+    @Autowired
+    private TaskService taskService;
     
     @Autowired
     private UserRepository userRepository;
@@ -194,6 +201,22 @@ public class ProjetController {
             return ResponseEntity.ok("Project deleted successfully");
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // GET - Get all tasks for a project
+    @GetMapping("/{projetId}/taches")
+    public ResponseEntity<List<TaskResponseDTO>> getProjectTasks(@PathVariable Long projetId) {
+        try {
+            List<Task> tasks = taskService.listerParProjet(projetId);
+            List<TaskResponseDTO> response = tasks.stream()
+                    .map(task -> taskService.getTaskDTO(task.getId()))
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {

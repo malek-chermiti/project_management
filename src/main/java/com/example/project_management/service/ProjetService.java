@@ -123,7 +123,7 @@ public class ProjetService {
 	public java.util.List<MemberDTO> getMembersDTO(Long projetId) {
 		Projet projet = getById(projetId);
 		return projet.getMembres().stream()
-				.map(user -> new MemberDTO(user.getId(), user.getNom(), user.getPrenom()))
+				.map(user -> new MemberDTO(user.getId(), user.getNom(), user.getPrenom(), user.getEmail()))
 				.collect(Collectors.toList());
 	}
 

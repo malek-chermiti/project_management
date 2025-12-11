@@ -2,9 +2,11 @@ package com.example.project_management.controller;
 
 import com.example.project_management.model.User;
 import com.example.project_management.model.Projet;
+import com.example.project_management.model.Task;
 import com.example.project_management.dto.PasswordChangeDTO;
 import com.example.project_management.dto.ProfileUpdateDTO;
 import com.example.project_management.dto.ProjetResponseDTO;
+import com.example.project_management.dto.TaskAssignedDTO;
 import com.example.project_management.service.UserService;
 import com.example.project_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +131,31 @@ public class UserController {
         try {
             User profile = userService.getById(user.getId());
             ProfileUpdateDTO response = new ProfileUpdateDTO(profile.getNom(), profile.getPrenom(), profile.getEmail());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // GET - Get assigned tasks for authenticated user
+    @GetMapping("/taches-assignees")
+    public ResponseEntity<List<TaskAssignedDTO>> getAssignedTasks(Authentication authentication) {
+        User user = getCurrentUser(authentication);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            List<Task> tasks = userService.getAssignedTasks(user.getId());
+            List<TaskAssignedDTO> response = tasks.stream()
+                    .map(task -> new TaskAssignedDTO(
+                            task.getId(),
+                            task.getTitre(),
+                            task.getEtat(),
+                            task.getDeadline(),
+                            task.getPriorite(),
+                            task.getProjet().getNom()
+                    ))
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

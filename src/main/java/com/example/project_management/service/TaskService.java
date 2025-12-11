@@ -8,9 +8,12 @@ import com.example.project_management.repository.UserRepository;
 import com.example.project_management.model.Task;
 import com.example.project_management.model.Projet;
 import com.example.project_management.model.User;
+import com.example.project_management.dto.TaskResponseDTO;
+import com.example.project_management.dto.MemberDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -160,5 +163,65 @@ public class TaskService {
         Projet projet = projetRepository.findById(projetId)
                 .orElseThrow(() -> new IllegalArgumentException("Projet not found"));
         return projet.getTaches();
+    }
+
+	@Transactional(readOnly = true)
+	public TaskResponseDTO getTaskDTO(Long taskId) {
+		Task task = getById(taskId);
+		List<MemberDTO> assigneesDTOs = task.getAssignees().stream()
+				.map(user -> new MemberDTO(user.getId(), user.getNom(), user.getPrenom(), user.getEmail()))
+				.collect(Collectors.toList());        return new TaskResponseDTO(
+                task.getId(),
+                task.getTitre(),
+                task.getDescription(),
+                task.getDeadline(),
+                task.getPriorite(),
+                task.getEtat(),
+                task.getAuteur().getNom() + " " + task.getAuteur().getPrenom(),
+                task.getDateCreation(),
+                assigneesDTOs
+        );
+    }
+
+	@Transactional(readOnly = true)
+	public List<MemberDTO> getMembresAssignes(Long taskId) {
+		Task task = getById(taskId);
+		return task.getAssignees().stream()
+				.map(user -> new MemberDTO(user.getId(), user.getNom(), user.getPrenom(), user.getEmail()))
+				.collect(Collectors.toList());
+	}    @Transactional
+    public void deleteTache(Long actorUserId, Long taskId) {
+        User actor = userRepository.findById(actorUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Actor user not found"));
+        Task task = getById(taskId);
+        Projet projet = task.getProjet();
+
+        boolean isCreator = projet.getCreateur() != null && projet.getCreateur().getId().equals(actor.getId());
+        boolean isAuthor = task.getAuteur() != null && task.getAuteur().getId().equals(actor.getId());
+        if (!(isCreator || isAuthor)) {
+            throw new SecurityException("Only project creator or task author can delete task");
+        }
+
+        // Remove task from project
+        projet.getTaches().remove(task);
+        projetRepository.save(projet);
+
+        // Remove task from creator
+        if (actor.getTasksCreees() != null) {
+            actor.getTasksCreees().remove(task);
+            userRepository.save(actor);
+        }
+
+        // Remove task from assignees
+        for (User assignee : new java.util.ArrayList<>(task.getAssignees())) {
+            if (assignee.getTasksAssignees() != null) {
+                assignee.getTasksAssignees().remove(task);
+                userRepository.save(assignee);
+            }
+        }
+        task.getAssignees().clear();
+
+        // Delete the task
+        taskRepository.deleteById(taskId);
     }
 }
