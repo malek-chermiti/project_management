@@ -8,15 +8,17 @@ public class ProjetResponseDTO {
     private String description;
     private String createurNom;
     private LocalDateTime dateCreation;
+    private Long chatId;
     
     public ProjetResponseDTO() {}
     
-    public ProjetResponseDTO(Long id, String nom, String description, String createurNom, LocalDateTime dateCreation) {
+    public ProjetResponseDTO(Long id, String nom, String description, String createurNom, LocalDateTime dateCreation, Long chatId) {
         this.id = id;
         this.nom = nom;
         this.description = description;
         this.createurNom = createurNom;
         this.dateCreation = dateCreation;
+        this.chatId = chatId;
     }
     
     public Long getId() {
@@ -57,5 +59,13 @@ public class ProjetResponseDTO {
     
     public void setDateCreation(LocalDateTime dateCreation) {
         this.dateCreation = dateCreation;
+    }
+    
+    public Long getChatId() {
+        return chatId;
+    }
+    
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
     }
 }

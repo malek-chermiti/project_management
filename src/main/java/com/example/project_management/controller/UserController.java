@@ -57,7 +57,8 @@ public class UserController {
             List<Projet> projets = userService.getMemberProjects(user.getId());
             List<ProjetResponseDTO> response = projets.stream()
                 .map(p -> new ProjetResponseDTO(p.getId(), p.getNom(), p.getDescription(), 
-                    p.getCreateur().getNom()+" "+p.getCreateur().getPrenom(), p.getDateCreation()))
+                    p.getCreateur().getNom()+" "+p.getCreateur().getPrenom(), p.getDateCreation(),
+                    p.getChat() != null ? p.getChat().getId() : null))
                 .collect(Collectors.toList());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -76,7 +77,8 @@ public class UserController {
             List<Projet> projets = userService.getCreatedProjects(user.getId());
             List<ProjetResponseDTO> response = projets.stream()
                 .map(p -> new ProjetResponseDTO(p.getId(), p.getNom(), p.getDescription(), 
-                    p.getCreateur().getNom()+" "+p.getCreateur().getPrenom(), p.getDateCreation()))
+                    p.getCreateur().getNom()+" "+p.getCreateur().getPrenom(), p.getDateCreation(),
+                    p.getChat() != null ? p.getChat().getId() : null))
                 .collect(Collectors.toList());
             return ResponseEntity.ok(response);
         } catch (Exception e) {

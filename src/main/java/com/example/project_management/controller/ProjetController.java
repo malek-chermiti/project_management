@@ -49,7 +49,8 @@ public class ProjetController {
                 projet.getNom(),
                 projet.getDescription(),
                 projet.getCreateur().getNom()+" "+projet.getCreateur().getPrenom(),
-                projet.getDateCreation()
+                projet.getDateCreation(),
+                projet.getChat() != null ? projet.getChat().getId() : null
             );
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
