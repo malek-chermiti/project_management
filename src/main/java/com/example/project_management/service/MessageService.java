@@ -9,6 +9,7 @@ import com.example.project_management.model.Message;
 import com.example.project_management.model.Chat;
 import com.example.project_management.model.User;
 import com.example.project_management.model.Projet;
+import java.util.List;
 
 @Service
 public class MessageService {
@@ -47,5 +48,11 @@ public class MessageService {
         chatRepository.save(chat);
         userRepository.save(actor);
         return saved;
+    }
+
+    public List<Message> getMessagesByChat(Long chatId) {
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found"));
+        return chat.getMessages();
     }
 }
