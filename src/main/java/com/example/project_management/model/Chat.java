@@ -12,7 +12,7 @@ public class Chat {
     private Long id;
 
     // --- Relations ---
-    @OneToMany(mappedBy = "chat")
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();
 
     @OneToOne

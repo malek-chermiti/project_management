@@ -159,7 +159,17 @@ public class ProjetService {
 		// Only remove if the user is currently a member
 		boolean wasMember = projet.getMembres().remove(user);
 		if (wasMember) {
+			// Remove membership
 			user.getProjets().remove(projet);
+
+			// Unassign the user from all tasks in this project
+			for (Task task : new java.util.ArrayList<>(projet.getTaches())) {
+				if (task.getAssignees().contains(user)) {
+					task.getAssignees().remove(user);
+					user.getTasksAssignees().remove(task);
+				}
+			}
+
 			projetRepository.save(projet);
 			userRepository.save(user);
 		}
@@ -187,7 +197,8 @@ public class ProjetService {
 		actor.getProjetsCrees().remove(projet);
 		userRepository.save(actor);
 
-		// Delete the project
+		// Deleting the project will cascade delete its tasks and chat,
+		// and with Chat.messages set to cascade+orphanRemoval, messages are cleared.
 		projetRepository.deleteById(projetId);
 	}
 }
