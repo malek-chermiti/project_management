@@ -158,3 +158,7 @@ $env:DB_PASSWORD="your_password"
 ## Notes
 - En production, restreindre CORS à des origines précises et gérer les variables via un gestionnaire sécurisé.
 - La suppression d’un projet supprime aussi son chat et tous les messages; les tâches du projet sont supprimées via cascade.
+
+## Auteurs
+- Malek Toumi — https://github.com/MalekToumi-815
+- Malek Chermiti — https://github.com/malek-chermiti
