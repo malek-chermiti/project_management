@@ -20,7 +20,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
 
 ## Key Endpoints
 - Projects
-  - `POST /api/projects` — créer un projet (créateur)
+  - `POST /projects` — créer un projet (créateur)
     - Request (JSON):
       ```json
       { "nom": "Projet A", "description": "Desc" }
@@ -29,7 +29,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "id": 1, "nom": "Projet A", "description": "Desc", "createurNomComplet": "Nom Prenom", "dateCreation": "2025-12-14T10:00:00", "chatId": 5 }
       ```
-  - `PUT /api/projects/{id}` — mettre à jour (créateur uniquement)
+  - `PUT /projects/{id}` — mettre à jour (créateur uniquement)
     - Request (JSON):
       ```json
       { "nom": "Projet A v2", "description": "Nouvelle desc" }
@@ -38,32 +38,32 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "nom": "Projet A v2", "description": "Nouvelle desc" }
       ```
-  - `POST /api/projects/{id}/members` — rejoindre un projet
+  - `POST /projects/{id}/members` — rejoindre un projet
     - Request: Authorization Bearer token
     - Response (JSON):
       ```json
       { "message": "Successfully joined project" }
       ```
-  - `DELETE /api/projects/{id}/members/{userId}` — retirer un membre (créateur seulement)
+  - `DELETE /projects/{id}/members/{userId}` — retirer un membre (créateur seulement)
     - Request: Authorization Bearer token
     - Response (JSON):
       ```json
       { "message": "Member removed successfully" }
       ```
-  - `POST /api/projects/{id}/leave` — quitter le projet (membre; désassignation de ses tâches)
+  - `POST /projects/{id}/leave` — quitter le projet (membre; désassignation de ses tâches)
     - Request: Authorization Bearer token
     - Response (JSON):
       ```json
       { "message": "Successfully left project" }
       ```
-  - `DELETE /api/projects/{id}` — supprimer le projet (cascade supprime tâches + messages)
+  - `DELETE /projects/{id}` — supprimer le projet (cascade supprime tâches + messages)
     - Request: Authorization Bearer token
     - Response (JSON):
       ```json
       { "message": "Project deleted successfully" }
       ```
 - Tasks
-  - `POST /api/projects/{id}/tasks` — créer une tâche
+  - `POST /projects/{id}/tasks` — créer une tâche
     - Request (JSON):
       ```json
       { "titre": "Tâche 1", "description": "Faire X", "deadline": "2025-12-31T23:59:00", "priorite": 2 }
@@ -72,7 +72,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "message": "Task created successfully", "id": 101 }
       ```
-  - `PUT /api/tasks/{taskId}` — mettre à jour (sans changer l’état)
+  - `PUT /tasks/{taskId}` — mettre à jour (sans changer l’état)
     - Request (JSON):
       ```json
       { "titre": "Tâche 1 bis", "description": "Faire Y", "deadline": "2026-01-15T12:00:00", "priorite": 3 }
@@ -81,7 +81,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "id": 101, "titre": "Tâche 1 bis", "description": "Faire Y", "etat": "Todo", "deadline": "2026-01-15T12:00:00", "priorite": 3, "projetId": 1, "auteurId": 12, "assigneeIds": [13, 14] }
       ```
-  - `PATCH /api/tasks/{taskId}/state` — changer l’état (créateur seul pour `terminee`)
+  - `PATCH /tasks/{taskId}/state` — changer l’état (créateur seul pour `terminee`)
     - Request (JSON):
       ```json
       { "etat": "en progres" }
@@ -90,7 +90,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "id": 101, "titre": "Tâche 1", "description": "Faire X", "etat": "en progres", "deadline": "2025-12-31T23:59:00", "priorite": 2, "projetId": 1, "auteurId": 12, "assigneeIds": [13, 14] }
       ```
-  - `POST /api/tasks/{taskId}/assignees` — assigner plusieurs membres
+  - `POST /tasks/{taskId}/assignees` — assigner plusieurs membres
     - Request (JSON):
       ```json
       { "userIds": [13, 15] }
@@ -99,7 +99,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "message": "Members assigned successfully" }
       ```
-  - `GET /api/projects/{id}/tasks` — lister les tâches du projet
+  - `GET /projects/{id}/tasks` — lister les tâches du projet
     - Response (JSON):
       ```json
       [
