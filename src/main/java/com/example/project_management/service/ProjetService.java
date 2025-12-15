@@ -67,6 +67,11 @@ public class ProjetService {
 		if (projet.getCreateur().getId().equals(user.getId())) {
 			throw new SecurityException("Project owner cannot join their own project");
 		}
+
+		// If already a member, raise an error for the frontend
+		if (projet.getMembres().contains(user)) {
+			throw new IllegalStateException("User already a member of this project");
+		}
 		
 		if (!projet.getMembres().contains(user)) {
 			projet.getMembres().add(user);

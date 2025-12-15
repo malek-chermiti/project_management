@@ -156,6 +156,8 @@ public class ProjetController {
         try {
             projetService.ajouterMembre(id, user.getId());
             return ResponseEntity.ok("Successfully joined project");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(e.getMessage());
         } catch (IllegalArgumentException e) {
