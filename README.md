@@ -11,13 +11,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
 - Maven
 
 ## Base URL
-- Development: `http://localhost:9090` 
-
-## Authentication
-- JWT stateless
-- Endpoint de login: `POST /auth/login` avec email et mot de passe → retourne un token JWT
-- Les endpoints protégés exigent `Authorization: Bearer <token>`
-
+  - Development: `http://localhost:9090` 
 ## Key Endpoints
 - Auth
   - `POST /auth/login` — authentification
@@ -27,94 +21,93 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```
     - Response (text): JWT token string
 
-- Projects
-  - `POST /projects` — créer un projet (créateur)
+- Projets
+  - `GET /projets/{id}` — détails d’un projet
+    - Response (JSON):
+      ```json
+      { "id": 1, "nom": "Projet A", "description": "Desc", "createurNom": "Nom Prenom", "dateCreation": "2025-12-14T10:00:00", "chatId": 5 }
+      ```
+  - `PATCH /projets/{id}` — mettre à jour (créateur uniquement)
+    - Request (JSON):
+      ```json
+      { "nom": "Projet A v2", "description": "Nouvelle desc" }
+      ```
+    - Response (JSON):
+      ```json
+      { "nom": "Projet A v2", "description": "Nouvelle desc" }
+      ```
+  - `GET /projets/{id}/membres` — lister les membres
+    - Response (JSON):
+      ```json
+      [ { "id": 12, "nom": "Doe", "prenom": "John", "email": "john@example.com" } ]
+      ```
+  - `DELETE /projets/{id}/membres/{userId}` — retirer un membre (créateur)
+    - Response (text): Member removed successfully
+  - `POST /projets` — créer un projet (créateur)
     - Request (JSON):
       ```json
       { "nom": "Projet A", "description": "Desc" }
       ```
+    - Response (text): Project created successfully with ID: 1
+  - `POST /projets/{id}/join` — rejoindre un projet
+    - Response (text): Successfully joined project
+  - `POST /projets/{id}/leave` — quitter le projet (membre; désassignation de ses tâches)
+    - Response (text): Successfully left project
+  - `DELETE /projets/{id}` — supprimer le projet (cascade supprime tâches + messages)
+    - Response (text): Project deleted successfully
+  - `GET /projets/{projetId}/taches` — lister les tâches du projet
     - Response (JSON):
       ```json
-      { "id": 1, "nom": "Projet A", "description": "Desc", "createurNomComplet": "Nom Prenom", "dateCreation": "2025-12-14T10:00:00", "chatId": 5 }
+      [
+        { "id": 101, "titre": "Tâche 1", "description": "Faire X", "deadline": "2025-12-31T23:59:00", "priorite": 2, "etat": "Todo", "auteur": "Nom Prenom", "dateCreation": "2025-12-01T10:00:00", "assignees": [ { "id": 12, "nom": "Doe", "prenom": "John", "email": "john@example.com" } ] },
+        { "id": 102, "titre": "Tâche 2", "description": "Faire Z", "deadline": "2026-01-05T12:00:00", "priorite": 1, "etat": "en progres", "auteur": "Nom Prenom", "dateCreation": "2025-12-02T09:30:00", "assignees": [] }
+      ]
       ```
-  - `PUT /projects/{id}` — mettre à jour (créateur uniquement)
-    - Request (JSON):
-      ```json
-      { "nom": "Projet A v2", "description": "Nouvelle desc" }
-      ```
+
+- Tâches
+  - `GET /taches/{id}` — détails d’une tâche
     - Response (JSON):
       ```json
-      { "nom": "Projet A v2", "description": "Nouvelle desc" }
+      { "id": 101, "titre": "Tâche 1", "description": "Faire X", "deadline": "2025-12-31T23:59:00", "priorite": 2, "etat": "Todo", "auteur": "Nom Prenom", "dateCreation": "2025-12-01T10:00:00", "assignees": [ { "id": 12, "nom": "Doe", "prenom": "John", "email": "john@example.com" } ] }
       ```
-  - `POST /projects/{id}/members` — rejoindre un projet
-    - Request: Authorization Bearer token
-    - Response (JSON):
-      ```json
-      { "message": "Successfully joined project" }
-      ```
-  - `DELETE /projects/{id}/members/{userId}` — retirer un membre (créateur seulement)
-    - Request: Authorization Bearer token
-    - Response (JSON):
-      ```json
-      { "message": "Member removed successfully" }
-      ```
-  - `POST /projects/{id}/leave` — quitter le projet (membre; désassignation de ses tâches)
-    - Request: Authorization Bearer token
-    - Response (JSON):
-      ```json
-      { "message": "Successfully left project" }
-      ```
-  - `DELETE /projects/{id}` — supprimer le projet (cascade supprime tâches + messages)
-    - Request: Authorization Bearer token
-    - Response (JSON):
-      ```json
-      { "message": "Project deleted successfully" }
-      ```
-- Tasks
-  - `POST /projects/{id}/tasks` — créer une tâche
+  - `POST /taches/{projetId}` — créer une tâche
     - Request (JSON):
       ```json
       { "titre": "Tâche 1", "description": "Faire X", "deadline": "2025-12-31T23:59:00", "priorite": 2 }
       ```
-    - Response (JSON):
-      ```json
-      { "message": "Task created successfully", "id": 101 }
-      ```
-  - `PUT /tasks/{taskId}` — mettre à jour (sans changer l’état)
+    - Response (text): Task created successfully with ID: 101
+  - `PATCH /taches/{id}` — mettre à jour (sans changer l’état)
     - Request (JSON):
       ```json
       { "titre": "Tâche 1 bis", "description": "Faire Y", "deadline": "2026-01-15T12:00:00", "priorite": 3 }
       ```
     - Response (JSON):
       ```json
-      { "id": 101, "titre": "Tâche 1 bis", "description": "Faire Y", "etat": "Todo", "deadline": "2026-01-15T12:00:00", "priorite": 3, "projetId": 1, "auteurId": 12, "assigneeIds": [13, 14] }
+      { "id": 101, "titre": "Tâche 1 bis", "description": "Faire Y", "deadline": "2026-01-15T12:00:00", "priorite": 3, "etat": "Todo", "auteur": "Nom Prenom", "dateCreation": "2025-12-01T10:00:00", "assignees": [ { "id": 12, "nom": "Doe", "prenom": "John", "email": "john@example.com" } ] }
       ```
-  - `PATCH /tasks/{taskId}/state` — changer l’état (créateur seul pour `terminee`)
+  - `DELETE /taches/{id}` — supprimer une tâche
+    - Response (text): Task deleted successfully
+  - `POST /taches/{id}/assigner` — assigner plusieurs membres
+    - Request (JSON):
+      ```json
+      { "userIds": [13, 15] }
+      ```
+    - Response (text): Members assigned successfully
+  - `GET /taches/{id}/assignes` — membres assignés
+    - Response (JSON):
+      ```json
+      [ { "id": 12, "nom": "Doe", "prenom": "John", "email": "john@example.com" } ]
+      ```
+  - `PATCH /taches/{id}/etat` — changer l’état (créateur seul pour "terminee")
     - Request (JSON):
       ```json
       { "etat": "en progres" }
       ```
     - Response (JSON):
       ```json
-      { "id": 101, "titre": "Tâche 1", "description": "Faire X", "etat": "en progres", "deadline": "2025-12-31T23:59:00", "priorite": 2, "projetId": 1, "auteurId": 12, "assigneeIds": [13, 14] }
+      { "id": 101, "titre": "Tâche 1", "description": "Faire X", "deadline": "2025-12-31T23:59:00", "priorite": 2, "etat": "en progres", "auteur": "Nom Prenom", "dateCreation": "2025-12-01T10:00:00", "assignees": [ { "id": 12, "nom": "Doe", "prenom": "John", "email": "john@example.com" } ] }
       ```
-  - `POST /tasks/{taskId}/assignees` — assigner plusieurs membres
-    - Request (JSON):
-      ```json
-      { "userIds": [13, 15] }
-      ```
-    - Response (JSON):
-      ```json
-      { "message": "Members assigned successfully" }
-      ```
-  - `GET /projects/{id}/tasks` — lister les tâches du projet
-    - Response (JSON):
-      ```json
-      [
-        { "id": 101, "titre": "Tâche 1", "description": "Faire X", "etat": "Todo", "deadline": "2025-12-31T23:59:00", "priorite": 2, "projetId": 1, "auteurId": 12, "assigneeIds": [13, 14] },
-        { "id": 102, "titre": "Tâche 2", "description": "Faire Z", "etat": "en progres", "deadline": "2026-01-05T12:00:00", "priorite": 1, "projetId": 1, "auteurId": 12, "assigneeIds": [] }
-      ]
-      ```
+
 - Messages
   - `POST /messages/{chatId}` — envoyer un message
     - Request (JSON):
@@ -123,14 +116,14 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```
     - Response (JSON):
       ```json
-      { "contenu": "Hello team", "auteur": "Nom Prenom", "dateEnvoi": "2025-12-14T10:05:00" }
+      { "contenu": "Hello team", "author": "Nom Prenom", "dateEnvoi": "2025-12-14T10:05:00" }
       ```
   - `GET /messages/{chatId}` — lister les messages du chat
     - Response (JSON):
       ```json
       [
-        { "contenu": "Hello team", "auteur": "Nom Prenom", "dateEnvoi": "2025-12-14T10:05:00" },
-        { "contenu": "Update done", "auteur": "Autre Membre", "dateEnvoi": "2025-12-14T10:06:00" }
+        { "contenu": "Hello team", "author": "Nom Prenom", "dateEnvoi": "2025-12-14T10:05:00" },
+        { "contenu": "Update done", "author": "Autre Membre", "dateEnvoi": "2025-12-14T10:06:00" }
       ]
       ```
 
@@ -140,19 +133,16 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "nom": "Nom", "prenom": "Prenom", "email": "user@example.com", "motDePasse": "secret" }
       ```
-    - Response (JSON):
-      ```json
-      { "message": "User created successfully" }
-      ```
+    - Response (text): User created successfully
   - `GET /users/projets-joined` — projets rejoints (auth)
     - Response (JSON):
       ```json
-      [ { "id": 1, "nom": "Projet A", "description": "Desc", "createurNomComplet": "Nom Prenom", "dateCreation": "2025-12-14T10:00:00", "chatId": 5 } ]
+      [ { "id": 1, "nom": "Projet A", "description": "Desc", "createurNom": "Nom Prenom", "dateCreation": "2025-12-14T10:00:00", "chatId": 5 } ]
       ```
   - `GET /users/projets-created` — projets créés (auth)
     - Response (JSON):
       ```json
-      [ { "id": 2, "nom": "Projet B", "description": "Desc", "createurNomComplet": "Nom Prenom", "dateCreation": "2025-12-15T09:00:00", "chatId": 6 } ]
+      [ { "id": 2, "nom": "Projet B", "description": "Desc", "createurNom": "Nom Prenom", "dateCreation": "2025-12-15T09:00:00", "chatId": 6 } ]
       ```
   - `PATCH /users/profile` — mettre à jour profil (auth)
     - Request (JSON):
@@ -168,10 +158,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
       ```json
       { "oldPassword": "secret", "newPassword": "newSecret" }
       ```
-    - Response (JSON):
-      ```json
-      { "message": "Password updated successfully" }
-      ```
+    - Response (text): Password updated successfully
   - `GET /users/profile` — profil utilisateur (auth)
     - Response (JSON):
       ```json
@@ -180,7 +167,7 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
   - `GET /users/taches-assignees` — tâches assignées (auth)
     - Response (JSON):
       ```json
-      [ { "id": 101, "titre": "Tâche 1", "etat": "Todo", "deadline": "2025-12-31T23:59:00", "priorite": 2, "projetNom": "Projet A" } ]
+      [ { "id": 101, "titre": "Tâche 1", "etat": "Todo", "deadline": "2025-12-31T23:59:00", "priorite": 2, "projectTitre": "Projet A" } ]
       ```
 
 ## Environment Variables
