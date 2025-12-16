@@ -102,7 +102,16 @@ public class ProjetController {
         }
         try {
             projetService.accederProjet(user.getId(), id);
+            Projet projet = projetService.getById(id);
             List<MemberDTO> members = projetService.getMembersDTO(id);
+            // Inject creator into the list (not necessarily a member)
+            User creator = projet.getCreateur();
+            if (creator != null) {
+                boolean alreadyPresent = members.stream().anyMatch(m -> m.getId().equals(creator.getId()));
+                if (!alreadyPresent) {
+                    members.add(0, new MemberDTO(creator.getId(), creator.getNom(), creator.getPrenom(), creator.getEmail()));
+                }
+            }
             return ResponseEntity.ok(members);
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(null);
