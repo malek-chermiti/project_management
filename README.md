@@ -19,6 +19,14 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
 - Les endpoints protégés exigent `Authorization: Bearer <token>`
 
 ## Key Endpoints
+- Auth
+  - `POST /auth/login` — authentification
+    - Request (JSON):
+      ```json
+      { "email": "user@example.com", "mot_de_passe": "secret" }
+      ```
+    - Response (text): JWT token string
+
 - Projects
   - `POST /projects` — créer un projet (créateur)
     - Request (JSON):
@@ -124,6 +132,55 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
         { "contenu": "Hello team", "auteur": "Nom Prenom", "dateEnvoi": "2025-12-14T10:05:00" },
         { "contenu": "Update done", "auteur": "Autre Membre", "dateEnvoi": "2025-12-14T10:06:00" }
       ]
+      ```
+
+- Users
+  - `POST /users/signin` — créer un utilisateur
+    - Request (JSON):
+      ```json
+      { "nom": "Nom", "prenom": "Prenom", "email": "user@example.com", "motDePasse": "secret" }
+      ```
+    - Response (JSON):
+      ```json
+      { "message": "User created successfully" }
+      ```
+  - `GET /users/projets-joined` — projets rejoints (auth)
+    - Response (JSON):
+      ```json
+      [ { "id": 1, "nom": "Projet A", "description": "Desc", "createurNomComplet": "Nom Prenom", "dateCreation": "2025-12-14T10:00:00", "chatId": 5 } ]
+      ```
+  - `GET /users/projets-created` — projets créés (auth)
+    - Response (JSON):
+      ```json
+      [ { "id": 2, "nom": "Projet B", "description": "Desc", "createurNomComplet": "Nom Prenom", "dateCreation": "2025-12-15T09:00:00", "chatId": 6 } ]
+      ```
+  - `PATCH /users/profile` — mettre à jour profil (auth)
+    - Request (JSON):
+      ```json
+      { "nom": "Nom Modifié", "prenom": "Prenom Modifié" }
+      ```
+    - Response (JSON):
+      ```json
+      { "nom": "Nom Modifié", "prenom": "Prenom Modifié" }
+      ```
+  - `PATCH /users/password` — changer mot de passe (auth)
+    - Request (JSON):
+      ```json
+      { "oldPassword": "secret", "newPassword": "newSecret" }
+      ```
+    - Response (JSON):
+      ```json
+      { "message": "Password updated successfully" }
+      ```
+  - `GET /users/profile` — profil utilisateur (auth)
+    - Response (JSON):
+      ```json
+      { "nom": "Nom", "prenom": "Prenom", "email": "user@example.com" }
+      ```
+  - `GET /users/taches-assignees` — tâches assignées (auth)
+    - Response (JSON):
+      ```json
+      [ { "id": 101, "titre": "Tâche 1", "etat": "Todo", "deadline": "2025-12-31T23:59:00", "priorite": 2, "projetNom": "Projet A" } ]
       ```
 
 ## Environment Variables

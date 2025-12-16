@@ -189,7 +189,8 @@ public class TaskService {
 		return task.getAssignees().stream()
 				.map(user -> new MemberDTO(user.getId(), user.getNom(), user.getPrenom(), user.getEmail()))
 				.collect(Collectors.toList());
-	}    @Transactional
+	}    
+    @Transactional
     public void deleteTache(Long actorUserId, Long taskId) {
         User actor = userRepository.findById(actorUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Actor user not found"));
