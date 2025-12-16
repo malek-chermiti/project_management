@@ -41,9 +41,13 @@ public class ProjetController {
     
     // GET - Get project details by ID (user to open project)
     @GetMapping("/{id}")
-    public ResponseEntity<ProjetResponseDTO> afficherDetails(@PathVariable Long id) {
+    public ResponseEntity<ProjetResponseDTO> afficherDetails(Authentication authentication, @PathVariable Long id) {
+        User user = getCurrentUser(authentication);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
         try {
-            Projet projet = projetService.getById(id);
+            Projet projet = projetService.accederProjet(user.getId(), id);
             ProjetResponseDTO response = new ProjetResponseDTO(
                 projet.getId(),
                 projet.getNom(),
@@ -53,6 +57,8 @@ public class ProjetController {
                 projet.getChat() != null ? projet.getChat().getId() : null
             );
             return ResponseEntity.ok(response);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(null);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
@@ -89,10 +95,17 @@ public class ProjetController {
     
     // GET - Get all members of a project
     @GetMapping("/{id}/membres")
-    public ResponseEntity<List<MemberDTO>> getMembers(@PathVariable Long id) {
+    public ResponseEntity<List<MemberDTO>> getMembers(Authentication authentication, @PathVariable Long id) {
+        User user = getCurrentUser(authentication);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
         try {
+            projetService.accederProjet(user.getId(), id);
             List<MemberDTO> members = projetService.getMembersDTO(id);
             return ResponseEntity.ok(members);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(null);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -213,13 +226,20 @@ public class ProjetController {
     
     // GET - Get all tasks for a project
     @GetMapping("/{projetId}/taches")
-    public ResponseEntity<List<TaskResponseDTO>> getProjectTasks(@PathVariable Long projetId) {
+    public ResponseEntity<List<TaskResponseDTO>> getProjectTasks(Authentication authentication, @PathVariable Long projetId) {
+        User user = getCurrentUser(authentication);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
         try {
+            projetService.accederProjet(user.getId(), projetId);
             List<Task> tasks = taskService.listerParProjet(projetId);
             List<TaskResponseDTO> response = tasks.stream()
                     .map(task -> taskService.getTaskDTO(task.getId()))
                     .collect(Collectors.toList());
             return ResponseEntity.ok(response);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(null);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
