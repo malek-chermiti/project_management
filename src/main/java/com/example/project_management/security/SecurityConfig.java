@@ -26,7 +26,10 @@ public class SecurityConfig {
     @Bean
     public JwtUtil jwtUtil() {
         // In production, read a strong secret from env (e.g., JWT_SECRET)
-        String secret = System.getenv().getOrDefault("JWT_SECRET", "change_me_to_a_strong_secret_change_me_to_a_strong_secret");
+        String secret = System.getenv("JWT_SECRET");
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException("JWT_SECRET environment variable not set or too weak (minimum 32 characters)");
+        }
         return new JwtUtil(secret, 1000L * 60 * 15); // 15 minutes
     }
 
@@ -36,7 +39,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> {
-                auth.anyRequest().permitAll();
+                auth
+                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/public/**").permitAll()
+                    .anyRequest().authenticated();
             })
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -50,12 +56,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         // Allow common dev origins; adjust as needed
-        config.setAllowedOrigins(List.of(
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:5500",
-            "http://127.0.0.1:5501",
-            "http://localhost:5500"
+        config.setAllowedOriginPatterns(List.of(
+            "http://localhost:*",
+            "https://*.netlify.app",
+            "https://*.vercel.app",
+            "https://*.railway.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));

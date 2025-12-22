@@ -79,7 +79,7 @@ public class TaskController {
     
     // PATCH - Update task
     @PatchMapping("/{id}")
-    public ResponseEntity<TaskResponseDTO> updateTask(
+    public ResponseEntity<Object> updateTask(
             Authentication authentication,
             @PathVariable Long id,
             @RequestBody TaskUpdateDTO updates) {
@@ -100,7 +100,7 @@ public class TaskController {
             TaskResponseDTO response = taskService.getTaskDTO(updated.getId());
             return ResponseEntity.ok(response);
         } catch (SecurityException e) {
-            return ResponseEntity.status(403).body(null);
+            return ResponseEntity.status(403).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -168,7 +168,7 @@ public class TaskController {
     
     // PATCH - Change task state
     @PatchMapping("/{id}/etat")
-    public ResponseEntity<TaskResponseDTO> changeTaskState(
+    public ResponseEntity<Object> changeTaskState(
             Authentication authentication,
             @PathVariable Long id,
             @RequestBody TaskChangeStateDTO stateData) {
@@ -182,7 +182,7 @@ public class TaskController {
             TaskResponseDTO response = taskService.getTaskDTO(id);
             return ResponseEntity.ok(response);
         } catch (SecurityException e) {
-            return ResponseEntity.status(403).body(null);
+            return ResponseEntity.status(403).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {

@@ -34,7 +34,7 @@ public class AuthController {
             String token = jwtUtil.generateToken(email);
             return ResponseEntity.ok(token);
         } catch (SecurityException e) {
-            throw e;
+            return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
 }
