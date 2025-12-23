@@ -11,7 +11,9 @@ Backend REST pour la gestion de projets, tâches et messagerie interne. Les util
 - Maven
 
 ## Base URL
+  - Production: `https://projectmanagement-production-d023.up.railway.app`
   - Development: `http://localhost:9090` 
+
 ## Key Endpoints
 - Auth
   - `POST /auth/login` — authentification
