@@ -61,7 +61,7 @@ public class SecurityConfig {
             "http://localhost:*",
             "https://*.netlify.app",
             "https://*.vercel.app",
-            "https://*.railway.app"
+            "https://*.up.railway.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
